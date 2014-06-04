@@ -34,7 +34,7 @@ class Result {
 
 public class CountUniqueIP {
 
-	private static final String PATH = "/Users/nuboat/Sources/CleanCode/src/resources/";
+	private static final String PATH = "./src/main/resources/";
 	private static final String NAME = "crm.in.th.log.1";
 	private static final String RESULT = "result.txt";
 
