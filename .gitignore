@@ -5,6 +5,13 @@
 .AppleDouble
 .LSOverride
 
+### Maven ###
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.next
+release.properties
+
 # Icon must ends with two \r.
 Icon
 
