@@ -48,7 +48,67 @@ public class CountUniqueIP {
         final Map<String, List<Integer>> groupValue = new HashMap<>();
         final Map<String, Integer> ipmap = new HashMap<>();
 
-        // Read data to buffer.
+        readDataToBuffer(lines);
+        mapDatabyIP(lines, mapResult);
+        groupbyIP(mapResult, groupValue);
+        reduceValue(groupValue, ipmap);
+        writeoutputtofile(ipmap);
+    }
+
+    private static void writeoutputtofile(final Map<String, Integer> ipmap) {
+        BufferedWriter writer = null;
+        try {
+            writer = Files.newBufferedWriter(
+                    FileSystems.getDefault().getPath(PATH, RESULT),
+                    Charset.defaultCharset(),
+                    StandardOpenOption.CREATE);
+
+            for (final String ip : ipmap.keySet()) {
+                writer.write(ip + " " + ipmap.get(ip) + "\n");
+            }
+        } catch (final IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (final IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private static void reduceValue(final Map<String, List<Integer>> groupValue, final Map<String, Integer> ipmap) {
+        for (final String key : groupValue.keySet()) {
+            final List<Integer> list = groupValue.get(key);
+
+            Integer total = 0;
+            for (final Integer i : list) {
+                total += i;
+            }
+
+            ipmap.put(key, total);
+        }
+    }
+
+    private static void groupbyIP(final List<Result> mapResult, final Map<String, List<Integer>> groupValue) {
+        for (final Result p : mapResult) {
+            final List<Integer> list = groupValue.getOrDefault(p.key, new LinkedList<Integer>());
+            list.add(p.value);
+
+            groupValue.put(p.key, list);
+        }
+    }
+
+    private static void mapDatabyIP(final List<String> lines, final List<Result> mapResult) {
+        for (final String log : lines) {
+            final String ip = log.split(" - - ")[0];
+            mapResult.add(new Result(ip, 1));
+        }
+    }
+
+    private static void readDataToBuffer(final List<String> lines) {
         BufferedReader reader = null;
         try {
             reader = Files.newBufferedReader(
@@ -73,60 +133,6 @@ public class CountUniqueIP {
                 }
             }
         }
-        // End Read data to buffer.
-
-        // Map Data by IP
-        for (final String log : lines) {
-            final String ip = log.split(" - - ")[0];
-            mapResult.add(new Result(ip, 1));
-        }
-        // End Map Data by IP.
-
-        // Group by IP
-        for (final Result p : mapResult) {
-            final List<Integer> list = groupValue.getOrDefault(p.key, new LinkedList<Integer>());
-            list.add(p.value);
-
-            groupValue.put(p.key, list);
-        }
-        // End Group by IP
-
-        // Reduce Value
-        for (final String key : groupValue.keySet()) {
-            final List<Integer> list = groupValue.get(key);
-
-            Integer total = 0;
-            for (final Integer i : list) {
-                total += i;
-            }
-
-            ipmap.put(key, total);
-        }
-        // End Reduce value
-
-        // Write output to file
-        BufferedWriter writer = null;
-        try {
-            writer = Files.newBufferedWriter(
-                    FileSystems.getDefault().getPath(PATH, RESULT),
-                    Charset.defaultCharset(),
-                    StandardOpenOption.CREATE);
-
-            for (final String ip : ipmap.keySet()) {
-                writer.write(ip + " " + ipmap.get(ip) + "\n");
-            }
-        } catch (final IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (final IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        // End Write output to file
     }
 
 }
