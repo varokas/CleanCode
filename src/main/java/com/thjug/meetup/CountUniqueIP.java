@@ -12,10 +12,7 @@ import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -43,15 +40,10 @@ public class CountUniqueIP {
 	}
 
     public static void run() {
-        final List<String> lines = new LinkedList<>();
-        final List<Result> mapResult = new LinkedList<>();
-        final Map<String, List<Integer>> groupValue = new HashMap<>();
-        final Map<String, Integer> ipmap = new HashMap<>();
-
-        readDataToBuffer(lines);
-        mapDatabyIP(lines, mapResult);
-        groupbyIP(mapResult, groupValue);
-        reduceValue(groupValue, ipmap);
+        List<String> lines = readDataToBuffer();
+        List<Result> mapResult = mapDatabyIP(lines);
+        Map<String, List<Integer>> groupValue = groupbyIP(mapResult);
+        Map<String, Integer> ipmap = reduceValue(groupValue);
         writeoutputtofile(ipmap);
     }
 
@@ -79,7 +71,9 @@ public class CountUniqueIP {
         }
     }
 
-    private static void reduceValue(final Map<String, List<Integer>> groupValue, final Map<String, Integer> ipmap) {
+    private static Map<String, Integer> reduceValue(final Map<String, List<Integer>> groupValue) {
+        final Map<String, Integer> ipmap = new HashMap<>();
+
         for (final String key : groupValue.keySet()) {
             final List<Integer> list = groupValue.get(key);
 
@@ -90,25 +84,36 @@ public class CountUniqueIP {
 
             ipmap.put(key, total);
         }
+
+        return ipmap;
     }
 
-    private static void groupbyIP(final List<Result> mapResult, final Map<String, List<Integer>> groupValue) {
+    private static Map<String, List<Integer>> groupbyIP(final List<Result> mapResult) {
+        final Map<String, List<Integer>> groupValue = new HashMap<>();
+
         for (final Result p : mapResult) {
             final List<Integer> list = groupValue.getOrDefault(p.key, new LinkedList<Integer>());
             list.add(p.value);
 
             groupValue.put(p.key, list);
         }
+
+        return groupValue;
     }
 
-    private static void mapDatabyIP(final List<String> lines, final List<Result> mapResult) {
+    private static List<Result> mapDatabyIP(final List<String> lines) {
+        final List<Result> mapResult = new LinkedList<>();
+
         for (final String log : lines) {
             final String ip = log.split(" - - ")[0];
             mapResult.add(new Result(ip, 1));
         }
+
+        return mapResult;
     }
 
-    private static void readDataToBuffer(final List<String> lines) {
+    private static List<String> readDataToBuffer() {
+        final List<String> lines = new LinkedList<>();
         BufferedReader reader = null;
         try {
             reader = Files.newBufferedReader(
@@ -133,6 +138,8 @@ public class CountUniqueIP {
                 }
             }
         }
+
+        return lines;
     }
 
 }
